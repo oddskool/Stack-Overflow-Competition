@@ -5,14 +5,17 @@ from sklearn.ensemble import RandomForestClassifier
 train_file = "train-sample.csv"
 full_train_file = "train.csv"
 test_file = "public_leaderboard.csv"
-submission_file = "basic_benchmark.csv"
+submission_file = "submission.csv"
 
-feature_names = [ "BodyLength"
-                , "NumTags"
-                , "OwnerUndeletedAnswerCountAtPostTime"
-                , "ReputationAtPostCreation"
-                , "TitleLength"
-                , "UserAge"
+feature_names = [ "BodyLength",
+                  "ReputationAtPostCreation",
+                  "NumTags",
+                  "OwnerUndeletedAnswerCountAtPostTime",
+                  "TitleLength",
+                  "UserAge",
+                  "ReputationAtPostCreationOverUserAgeRatio",
+                  "UndeletedAnswersOverUserAgeRatio",
+                  "MoreThanOneParagraph"
                 ]
 
 def main():
@@ -23,7 +26,10 @@ def main():
     fea = features.extract_features(feature_names, data)
 
     print("Training the model")
-    rf = RandomForestClassifier(n_estimators=50, verbose=2, compute_importances=True, n_jobs=-1)
+    rf = RandomForestClassifier(n_estimators=100,
+                                verbose=1,
+                                compute_importances=True,
+                                n_jobs=6)
     rf.fit(fea, data["OpenStatus"])
 
     print("Reading test file and making predictions")

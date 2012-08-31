@@ -5,6 +5,7 @@ import features
 import numpy as np
 import pandas as pd
 import re
+import math
 
 def camel_to_underscores(name):
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
@@ -29,6 +30,24 @@ def user_age(data):
     return pd.DataFrame.from_dict({"UserAge": (data["PostCreationDate"]
             - data["OwnerCreationDate"]).apply(lambda x: x.total_seconds())})
 
+def reputation_at_post_creation_over_user_age_ratio(data):
+    return pd.DataFrame.from_dict({"ReputationAtPostCreationOverUserAgeRatio": data["ReputationAtPostCreation"] / (data["PostCreationDate"] - data["OwnerCreationDate"]).apply(lambda x: x.days)})
+
+def undeleted_answers_over_user_age_ratio(data):
+    return pd.DataFrame.from_dict({"UndeletedAnswersOverUserAgeRatio": data["OwnerUndeletedAnswerCountAtPostTime"] / (data["PostCreationDate"] - data["OwnerCreationDate"]).apply(lambda x: x.days)})
+
+def more_than_one_paragraph(data):
+    def computer(e):
+        nb_new_lines = len([ c for c in e if c == '\n' ])
+        display_lines = e.split('\n')
+        nb_display_lines = 0
+        for line in display_lines:
+            nb_display_lines += math.ceil(len(line)/102)
+        if not nb_new_lines:
+            return 1.0
+        return nb_display_lines / float(nb_new_lines)
+    return pd.DataFrame.from_dict({"MoreThanOneParagraph":data["BodyMarkdown"].apply(computer)})
+
 ###########################################################
 
 def extract_features(feature_names, data):
@@ -38,7 +57,7 @@ def extract_features(feature_names, data):
             fea = fea.join(data[name])
         else:
             fea = fea.join(getattr(features, 
-                camel_to_underscores(name))(data))
+                                   camel_to_underscores(name))(data))
     return fea
 
 if __name__=="__main__":
