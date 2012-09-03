@@ -15,7 +15,8 @@ feature_names = [ "BodyLength",
                   "UserAge",
                   "ReputationAtPostCreationOverUserAgeRatio",
                   "UndeletedAnswersOverUserAgeRatio",
-                  "MoreThanOneParagraph"
+                  "MoreThanOneParagraph",
+                  "NbBadges"
                 ]
 
 def main():
@@ -26,10 +27,10 @@ def main():
     fea = features.extract_features(feature_names, data)
 
     print("Training the model")
-    rf = RandomForestClassifier(n_estimators=100,
-                                verbose=1,
+    rf = RandomForestClassifier(n_estimators=80,
+                                verbose=2,
                                 compute_importances=True,
-                                n_jobs=6)
+                                n_jobs=4)
     rf.fit(fea, data["OpenStatus"])
 
     print("Reading test file and making predictions")
