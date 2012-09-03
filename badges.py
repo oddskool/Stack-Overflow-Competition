@@ -2,7 +2,7 @@ import sys
 
 badges = {}
 
-with open('/home/ediemert/datasets/stackoverflow/badges.xml') as fd:
+with open('./data/badges.xml') as fd:
     _ = 0
     print "reading badges..."
     for line in fd:
