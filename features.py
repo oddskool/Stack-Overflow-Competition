@@ -7,8 +7,6 @@ import pandas as pd
 import re
 import math
 
-from badges import badges
-
 def camel_to_underscores(name):
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
@@ -51,6 +49,7 @@ def more_than_one_paragraph(data):
     return pd.DataFrame.from_dict({"MoreThanOneParagraph":data["BodyMarkdown"].apply(computer)})
 
 def nb_badges(data):
+    from badges import badges
     def computer(e):
         return badges.get(int(e),0)
     return pd.DataFrame.from_dict({"NbBadges":data["OwnerUserId"].apply(computer)})
