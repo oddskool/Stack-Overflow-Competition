@@ -68,7 +68,7 @@ def extract_features(feature_names, data):
 
 
 ###########################################################
-import csv
+import csv, random
 def online_extract_features(fn, limit=1e5):
     fea = dict()
     fd = open(fn,'rb')
@@ -100,6 +100,8 @@ def online_extract_features(fn, limit=1e5):
     status['OpenStatus'] = []
     for row in reader:
         assert(len(header) == len(row))
+        if row[st_index] == 'open' and not random.random() < 0.1:
+            continue
         _ += 1
         if not _ % 100:
             print "\r%d"%_,
