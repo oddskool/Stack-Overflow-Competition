@@ -69,7 +69,7 @@ def extract_features(feature_names, data):
 
 ###########################################################
 import csv, random
-def online_extract_features(fn, limit=1e5):
+def online_extract_features(fn, train=1,limit=1e5):
     fea = dict()
     fd = open(fn,'rb')
     reader = csv.reader(fd,
@@ -84,24 +84,29 @@ def online_extract_features(fn, limit=1e5):
             blen_index = header.index('BodyMarkdown')
             title_index = header.index('Title')
             tags_indexes = [ header.index('Tag%d'%i) for i in range(1,6) ]
-            try:
+            reput_index = header.index('ReputationAtPostCreation')
+            if train:
                 st_index = header.index('OpenStatus')
-            except:
-                pass
             break
+
     _ = 0
     for f in ('BodyCharLength',
               'BodyWordLength',
               'BodyCodeLines',
               'NumTags',
-              'TitleLengthWords'):
+              'TitleLengthWords',
+              'ReputationAtPostCreation'):
         fea[f] = []
     status = {}
     status['OpenStatus'] = []
+    nb_open = 0
     for row in reader:
         assert(len(header) == len(row))
-        if row[st_index] == 'open' and not random.random() < 0.1:
-            continue
+        if train:
+            if row[st_index] == 'open':
+                nb_open += 1
+                if not random.random() < 0.1:
+                    continue
         _ += 1
         if not _ % 100:
             print "\r%d"%_,
@@ -112,8 +117,9 @@ def online_extract_features(fn, limit=1e5):
         fea['BodyWordLength'].append( len(row[blen_index].split(' '))  )
         fea['BodyCodeLines'].append( len(row[blen_index].split('\n    '))  )
         fea['NumTags'].append(len([ row[i] for i in tags_indexes if len(row[i]) ]))
-        try:
+        fea['ReputationAtPostCreation'].append(row[reput_index])
+        if train:
             status['OpenStatus'].append(row[st_index])
-        except:
-            pass
+
+    print nb_open,'/',_,'open'
     return pd.DataFrame.from_dict(fea),pd.DataFrame.from_dict(status)

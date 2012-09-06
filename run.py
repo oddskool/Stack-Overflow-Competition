@@ -15,7 +15,7 @@ submission_file = "submission.csv"
 def make_submission():
     print("Reading data")
     fea, status = features.online_extract_features('data/train.csv',
-                                                   5e6)
+                                                   limit=5e6)
     print("Training the model")
     rf = RandomForestClassifier(n_estimators=50,
                                 verbose=2,
@@ -35,7 +35,8 @@ def make_submission():
     print("Reading test file and making predictions")
     data = cu.get_dataframe(test_file)
     test_features = features.online_extract_features('data/'+test_file,
-                                                     1e12)[0]
+                                                     train=False,
+                                                     limit=1e12)[0]
     probs = rf.predict_proba(test_features)
 
     if True:
