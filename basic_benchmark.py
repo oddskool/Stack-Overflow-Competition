@@ -19,8 +19,8 @@ feature_names = [ "BodyLength",
                   "TitleLength",
                   "UserAge",
                   "ReputationAtPostCreationOverUserAgeRatio",
-                  "UndeletedAnswersOverUserAgeRatio",
-                  "MoreThanOneParagraph",
+                  #"UndeletedAnswersOverUserAgeRatio",
+                  #"MoreThanOneParagraph",
                   "NbBadges"
                 ]
 
@@ -31,7 +31,7 @@ def make_submission():
         data = pickle.load(open('data.pik'))
     else:
         print("Reading the data")
-        data = cu.get_dataframe(train_file)
+        data = cu.get_dataframe(full_train_file)
         pickle.dump(data,open('data.pik','w'))
 
     fea = None
@@ -48,8 +48,8 @@ def make_submission():
                                 verbose=2,
                                 compute_importances=True,
                                 oob_score=True,
-                                criterion='entropy',
-                                n_jobs=4)
+                                #criterion='entropy',
+                                n_jobs=2)
     
     rf.fit(fea, data["OpenStatus"])
     print "Features Importance:"

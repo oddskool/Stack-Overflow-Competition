@@ -66,15 +66,52 @@ def extract_features(feature_names, data):
                                    camel_to_underscores(name))(data))
     return fea
 
-if __name__=="__main__":
-    feature_names = [ "BodyLength"
-                    , "NumTags"
-                    , "OwnerUndeletedAnswerCountAtPostTime"
-                    , "ReputationAtPostCreation"
-                    , "TitleLength"
-                    , "UserAge"
-                    ]
-              
-    data = cu.get_dataframe("C:\\Users\\Ben\\Temp\\StackOverflow\\train-sample.csv")
-    features = extract_features(feature_names, data)
-    print(features)
+
+###########################################################
+import csv
+def online_extract_features(fn, limit=1e5):
+    fea = dict()
+    fd = open(fn,'rb')
+    reader = csv.reader(fd,
+                        delimiter=',',
+                        quotechar='"',
+                        quoting=csv.QUOTE_MINIMAL)
+    header = None
+    for row in reader:
+        if not header:
+            header = row
+            #print "header:",header
+            blen_index = header.index('BodyMarkdown')
+            title_index = header.index('Title')
+            tags_indexes = [ header.index('Tag%d'%i) for i in range(1,6) ]
+            try:
+                st_index = header.index('OpenStatus')
+            except:
+                pass
+            break
+    _ = 0
+    for f in ('BodyCharLength',
+              'BodyWordLength',
+              'BodyCodeLines',
+              'NumTags',
+              'TitleLengthWords'):
+        fea[f] = []
+    status = {}
+    status['OpenStatus'] = []
+    for row in reader:
+        assert(len(header) == len(row))
+        _ += 1
+        if not _ % 100:
+            print "\r%d"%_,
+        if _ > limit:
+            break
+        fea['TitleLengthWords'].append( len(row[title_index].split(' '))  )
+        fea['BodyCharLength'].append( len(row[blen_index])  )
+        fea['BodyWordLength'].append( len(row[blen_index].split(' '))  )
+        fea['BodyCodeLines'].append( len(row[blen_index].split('\n    '))  )
+        fea['NumTags'].append(len([ row[i] for i in tags_indexes if len(row[i]) ]))
+        try:
+            status['OpenStatus'].append(row[st_index])
+        except:
+            pass
+    return pd.DataFrame.from_dict(fea),pd.DataFrame.from_dict(status)
