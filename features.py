@@ -31,6 +31,33 @@ def nb_badges(e):
     from badges import badges
     return badges.get(int(e),0)
 
+def what_how(title):
+    t = title.lower()
+    s = 0
+    if 'what' in t:
+        s+= 1
+    if 'how' in t:
+        s+= 1e1
+    if 'best' in t:
+        s+= 1e2
+    if 'compare' in t:
+        s+= 1e3
+    if 'why' in t:
+        s+= 1e4
+    if 'favorite' in t:
+        s+= 1e5
+    if 'new' in t:
+        s+= 1e6
+    if 'most' in t:
+        s+= 1e7
+    if 'good' in t:
+        s+= 1e8
+    if 'which' in t:
+        s+= 1e9
+    if 'where' in t:
+        s+= 1e10
+    return s
+
 ###########################################################
 import csv, random
 def online_extract_features(fn, train=1,limit=1e5):
@@ -92,7 +119,7 @@ def online_extract_features(fn, train=1,limit=1e5):
         fea['BodyCodeLines'].append( len(row[blen_index].split('\n    '))  )
         fea['NumTags'].append(len([ row[i] for i in tags_indexes if len(row[i]) ]))
         fea['ReputationAtPostCreation'].append(int(row[reput_index]))
-        fea['WhatHowTitle'].append( row[title_index]  )
+        fea['WhatHowTitle'].append( what_how(row[title_index])  )
         if train:
             status['OpenStatus'].append(row[st_index])
 
