@@ -39,7 +39,7 @@ def make_submission():
                                                      limit=1e12)[0]
     probs = rf.predict_proba(test_features)
 
-    if True:
+    if False:
         print("Calculating priors and updating posteriors")
         new_priors = cu.get_priors(full_train_file)
         old_priors = cu.get_priors(train_file)

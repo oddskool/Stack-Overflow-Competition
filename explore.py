@@ -31,9 +31,10 @@ def nb_badges(e):
     from badges import badges
     return badges.get(int(e),0)
 
+
 ###########################################################
 import csv, random
-def online_extract_features(fn, train=1,limit=1e5):
+def online_extract_features(fn):
     fea = dict()
     fd = open(fn,'rb')
     reader = csv.reader(fd,
@@ -51,50 +52,36 @@ def online_extract_features(fn, train=1,limit=1e5):
             title_index = header.index('Title')
             tags_indexes = [ header.index('Tag%d'%i) for i in range(1,6) ]
             reput_index = header.index('ReputationAtPostCreation')
-            if train:
-                st_index = header.index('OpenStatus')
+            st_index = header.index('OpenStatus')
             break
 
-    _ = 0
     for f in ('BodyCharLength',
               'BodyWordLength',
               'BodyCodeLines',
               'NumTags',
-              'TitleCharLength',
               'TitleLengthWords',
               'ReputationAtPostCreation',
               'NbBadges',
               'UserAge',
-              'MoreThanOneParagraph',
-              'WhatHowTitle'):
-        fea[f] = []
-    status = {}
-    status['OpenStatus'] = []
-    nb_open = 0
-    for row in reader:
-        if train:
-            if row[st_index] == 'open':
-                nb_open += 1
-                if not random.random() < 0.50:
-                    continue
-        _ += 1
-        if not _ % 100:
-            print "\r%d"%_,
-        if _ > limit:
-            break
-        fea['MoreThanOneParagraph'].append(more_than_one_paragraph(row[blen_index]))
-        fea['UserAge'].append(user_age(row[postdate_index],row[userdate_index]))
-        fea['NbBadges'].append(nb_badges(row[user_index]))
-        fea['TitleLengthWords'].append( len(row[title_index].split(' '))  )
-        fea['TitleCharLength'].append( len(row[title_index])  )
-        fea['BodyCharLength'].append( len(row[blen_index])  )
-        fea['BodyWordLength'].append( len(row[blen_index].split(' '))  )
-        fea['BodyCodeLines'].append( len(row[blen_index].split('\n    '))  )
-        fea['NumTags'].append(len([ row[i] for i in tags_indexes if len(row[i]) ]))
-        fea['ReputationAtPostCreation'].append(int(row[reput_index]))
-        fea['WhatHowTitle'].append( row[title_index]  )
-        if train:
-            status['OpenStatus'].append(row[st_index])
+              'MoreThanOneParagraph'):
+        print '%s\t'%f,
+    print
 
-    print nb_open,'/',_,'open'
-    return pd.DataFrame.from_dict(fea),pd.DataFrame.from_dict(status)
+    log = open('special.csv','w')
+
+    for row in reader:
+        if row[st_index] == 'open':
+            continue
+        print >>log,'\t'.join([ _.replace('\n','\\n') for _ in row ])
+        print '%s\t'%row[st_index],
+        print '%s\t'%len(row[blen_index]),
+        print '%s\t'%len(row[blen_index].split(' ')),
+        print '%s\t'%len(row[blen_index].split('\n    ')),
+        print '%s\t'%len([ row[i] for i in tags_indexes if len(row[i]) ]),
+        print '%s\t'%len(row[title_index].split(' ')),
+        print '%s\t'%int(row[reput_index]),
+        print '%s\t'%nb_badges(row[user_index]),
+        print '%s\t'%user_age(row[postdate_index],row[userdate_index]),
+        print '%s\t'%more_than_one_paragraph(row[blen_index])
+
+online_extract_features('data/train.csv')
